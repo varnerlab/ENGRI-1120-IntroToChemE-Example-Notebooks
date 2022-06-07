@@ -52,9 +52,7 @@ For a single-input $\mathcal{S}^{+}=\left\{1\right\}$, single-output $\mathcal{S
 
 $$V_{k+1} = V_{k} + \Biggl(\alpha - \beta\sqrt{V_{k}}\Biggr)\left(t_{k+1}-t_{k}\right)\qquad{k=1,2,\dots,N-1}$$
 
-where we assumed (made up) specific forms for the flow terms; let $\dot{F}_{1} = \alpha$ L/hr and $\dot{F}_{2} = \beta\sqrt{V}$, where $\alpha>0$ and $\beta>0$ are constants. 
-
-At steady-state, the difference in volume between subsequent time steps is equal to zero: $V_{k+1} = V_{k}$. In this case, the dynamic volume balance becomes:
+where we assumed (made up) specific forms for the flow terms; let $\dot{F}_{1} = \alpha$ L/hr and $\dot{F}_{2} = \beta\sqrt{V}$, where $\alpha>0$ and $\beta>0$ are constants. At steady-state, the difference in volume between subsequent time steps is equal to zero: $V_{k+1} = V_{k}$. In this case, the dynamic volume balance becomes:
 
 $$\Biggl(\alpha - \beta\sqrt{V^{*}}\Biggr)\left(t_{k+1}-t_{k}\right) = 0$$
 
