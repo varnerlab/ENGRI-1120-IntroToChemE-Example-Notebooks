@@ -60,17 +60,59 @@ md"""
 function NPV(cashflow::Array{Float64,2}, discount_rate::Float64)::Float64
 	
 	# initialize -
-	npv_value = 0.0
-	(number_of_periods, number_of_money_streams) = size(cashflow)
+	npv_value = 0.0 # default return value 
+	(number_of_periods, number_of_streams) = size(cashflow) # rows: period, cols: streams
+
+	# compute the period one cash flow -
+	CF₁ = sum(cashflow[1,:])
+
+	# update the npv_value -
+	npv_value += CF₁
 	
-	
+	# main loop -
+	for t ∈ 2:number_of_periods
+
+		# compute the discount factor -
+		d = (1+discount_rate)^(t-1)
+
+		# compute the cash flow -
+		CFₜ = (1/d)*sum(cashflow[t,:])
+
+		# update the npv_value -
+		npv_value += CFₜ
+	end
+
+
+	# return -
+	return npv_value
 end
 
 # ╔═╡ 4b93f2a6-6608-44b5-9037-6afa3c00b524
 md"""
 ### Results and Discussion
-Fill me in.
 """
+
+# ╔═╡ 9ae8618c-5b1c-4198-a8ad-cfea6b6e2a4d
+begin
+
+	# Setup the cash flow array -
+	T = 4 # there are 4 periods for this project
+	S = 3 # three cash flows -
+	C = zeros(T,S)
+
+	# add stuff to the cash flow matrix -
+	# Year 1: (no savings in year 1)
+	C[1,1] = -230 		# cost of the installation of the system 
+	C[1,2] = -800.0 	# normal electricty cost
+
+	# Year 2 -> T: Savings
+	C[2:T,2] .= -800.0 # normal electricty cost
+	C[2:T,3] .= 90.0   # savinggs
+	
+end
+
+# ╔═╡ c203133b-9e69-487f-b1dc-e0f5665d1c5d
+C
 
 # ╔═╡ 0fc47d8a-ea9d-4537-9322-c8a93a1ac39b
 md"""
@@ -1024,6 +1066,8 @@ version = "0.9.1+5"
 # ╠═857f37a5-c8fc-4259-bbee-0b04bd8a401d
 # ╠═0c541f24-bd77-466e-bbb6-41992cb15bf9
 # ╟─4b93f2a6-6608-44b5-9037-6afa3c00b524
+# ╠═9ae8618c-5b1c-4198-a8ad-cfea6b6e2a4d
+# ╠═c203133b-9e69-487f-b1dc-e0f5665d1c5d
 # ╟─0fc47d8a-ea9d-4537-9322-c8a93a1ac39b
 # ╟─5e4f6bb6-720b-447e-a180-67e2a02f2466
 # ╟─7854c0be-fc82-11ec-1b4c-8b2975514264
