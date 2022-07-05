@@ -90,6 +90,9 @@ function NPV(cashflow::Array{Float64,2}, discount_rate::Float64)::Float64
 end
 
 # ╔═╡ 38b1b24f-65e6-4685-bacc-a45efc3d1f3f
+# ------------------------------------------------------------------------------------ #
+# Fill me in with some stuff
+# ------------------------------------------------------------------------------------ #
 function fitness(κ,cashflow)
 
 	# grab the discount rate from the κ array -
@@ -109,7 +112,7 @@ md"""
 
 # ╔═╡ eef2e742-2174-45c0-88d5-00adcd5c808a
 md"""
-##### a) Setup Cash Flow Matrix C
+##### a) Setup Cash Flow Matrix $C$
 """
 
 # ╔═╡ 9ae8618c-5b1c-4198-a8ad-cfea6b6e2a4d
@@ -130,9 +133,6 @@ begin
 	# show - 
 	nothing
 end
-
-# ╔═╡ bff4e4e0-1137-4dfa-8d07-01f00002b634
-C
 
 # ╔═╡ b468ba33-b943-4d81-82d6-63091e2eb092
 md"""
@@ -157,7 +157,7 @@ end
 
 # ╔═╡ e78caf64-87c4-4306-8e7d-56614e9f184d
 md"""
-##### c) Visualize NPV array
+##### c) Visualize the NPV array
 """
 
 # ╔═╡ 47185ca6-0c68-4a7c-b052-451f4d457de9
@@ -177,7 +177,7 @@ end
 
 # ╔═╡ 42256d05-6e1b-4292-9656-4366084a24e0
 md"""
-##### d) Compute the Internal rate of return (IRR)?
+##### d) Compute the internal rate of return (IRR)?
 """
 
 # ╔═╡ 8d676d60-5de6-4447-bc2a-d48463ca9e4a
@@ -212,7 +212,7 @@ end
 md"""
 ### Summary and Conclusions
 
-The installation of the computer-controlled lighting system from Johnson Controls has a positive net present value (NPV) for discount rates of less than approximately 8.5%. Beyond this discount rate, the alternative investment would be the preferred choice.
+The installation of the computer-controlled lighting system from Johnson Controls has a positive net present value (NPV) for discount rates less than 8.5%. However, the alternative investment would be the preferred choice beyond this discount rate.
 
 """
 
@@ -1293,7 +1293,6 @@ version = "0.9.1+5"
 # ╟─4b93f2a6-6608-44b5-9037-6afa3c00b524
 # ╟─eef2e742-2174-45c0-88d5-00adcd5c808a
 # ╠═9ae8618c-5b1c-4198-a8ad-cfea6b6e2a4d
-# ╠═bff4e4e0-1137-4dfa-8d07-01f00002b634
 # ╟─b468ba33-b943-4d81-82d6-63091e2eb092
 # ╠═9dfe40dd-72a9-484f-b5de-dfe0ff0666ec
 # ╟─e78caf64-87c4-4306-8e7d-56614e9f184d
