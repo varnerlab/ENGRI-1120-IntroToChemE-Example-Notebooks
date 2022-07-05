@@ -8,6 +8,8 @@ using InteractiveUtils
 begin
 	# load Julia packages -
 	using Plots
+	using Optim
+	using PlutoUI
 end
 
 # ╔═╡ 5f67cb59-c3bb-4b61-9c59-7739ae15c461
@@ -42,7 +44,7 @@ The discount rate $r_{t+1,t}$ will be company-specific as it's related to how th
 md"""
 ### Problem Statement
 
-Should we install a new computer-controlled lighting system (or not)? [Let's do an example from MIT 15.401](https://ocw.mit.edu/courses/sloan-school-of-management/15-401-finance-theory-i-fall-2008/). Your firm spends 800,000 USD annually for electricity at its Boston headquarters. Johnson Controls offers to install a new computer-controlled lighting system that will reduce electric bills by 90,000 USD each of the next three years. Is this a good investment if the system costs 230,000 USD fully installed?
+Should we install a new computer-controlled lighting system (or not)? [Let's do an example from MIT 15.401](https://ocw.mit.edu/courses/sloan-school-of-management/15-401-finance-theory-i-fall-2008/). Johnson Controls offers to install a new computer-controlled lighting system that will reduce electric bills by 90,000 USD each of the next three years. Is this a good investment if the system costs 230,000 USD fully installed?
 
 __Assumptions__
 * The discount rate is constant over the lifetime of the project ($\bar{r}$ is a parameter in the problem)
@@ -87,9 +89,27 @@ function NPV(cashflow::Array{Float64,2}, discount_rate::Float64)::Float64
 	return npv_value
 end
 
+# ╔═╡ 38b1b24f-65e6-4685-bacc-a45efc3d1f3f
+function fitness(κ,cashflow)
+
+	# grab the discount rate from the κ array -
+	discount_rate = κ[1]
+	
+	# we need to min the NPV - 
+	npv_value = NPV(cashflow, discount_rate)
+
+	# return the fitness -
+	return (npv_value)^2
+end
+
 # ╔═╡ 4b93f2a6-6608-44b5-9037-6afa3c00b524
 md"""
 ### Results and Discussion
+"""
+
+# ╔═╡ eef2e742-2174-45c0-88d5-00adcd5c808a
+md"""
+##### a) Setup Cash Flow Matrix C
 """
 
 # ╔═╡ 9ae8618c-5b1c-4198-a8ad-cfea6b6e2a4d
@@ -97,27 +117,103 @@ begin
 
 	# Setup the cash flow array -
 	T = 4 # there are 4 periods for this project
-	S = 3 # three cash flows -
+	S = 2 # three cash flows -
 	C = zeros(T,S)
 
 	# add stuff to the cash flow matrix -
 	# Year 1: (no savings in year 1)
 	C[1,1] = -230 		# cost of the installation of the system 
-	C[1,2] = -800.0 	# normal electricty cost
 
 	# Year 2 -> T: Savings
-	C[2:T,2] .= -800.0 # normal electricty cost
-	C[2:T,3] .= 90.0   # savinggs
-	
+	C[2:T,2] .= 90.0   # savinggs
+
+	# show - 
+	nothing
 end
 
-# ╔═╡ c203133b-9e69-487f-b1dc-e0f5665d1c5d
+# ╔═╡ bff4e4e0-1137-4dfa-8d07-01f00002b634
 C
+
+# ╔═╡ b468ba33-b943-4d81-82d6-63091e2eb092
+md"""
+##### b) Compute the NPV for a range of discount rates
+"""
+
+# ╔═╡ 9dfe40dd-72a9-484f-b5de-dfe0ff0666ec
+begin
+
+	# setup the discount rates that we are interested in -
+	discount_rate_array = range(0.01, stop=0.10, length=210) |> collect
+	npv_array = Array{Float64,1}() # allocate some space to store the NPV values -
+
+	# main loop -
+	for discount_rate ∈ discount_rate_array
+
+		# compute the npv for this discount rate -
+		value = NPV(C,discount_rate)
+		push!(npv_array, value)
+	end
+end
+
+# ╔═╡ e78caf64-87c4-4306-8e7d-56614e9f184d
+md"""
+##### c) Visualize NPV array
+"""
+
+# ╔═╡ 47185ca6-0c68-4a7c-b052-451f4d457de9
+begin
+
+	# plot the discount rate 
+	plot(discount_rate_array.*100, npv_array, lw=2, label="NPV")
+
+	# what is the zero line?
+	zero_line = zeros(length(discount_rate_array))
+	plot!(discount_rate_array.*100, zero_line, lw=2, label="Zero NPV")
+
+	# axis labels -
+	xlabel!("Discount rate r̄ (percentage)", fontsize=18)
+	ylabel!("Net Present Value (NPV) (2022 dollars)", fontsize=18)
+end
+
+# ╔═╡ 42256d05-6e1b-4292-9656-4366084a24e0
+md"""
+##### d) Compute the Internal rate of return (IRR)?
+"""
+
+# ╔═╡ 8d676d60-5de6-4447-bc2a-d48463ca9e4a
+begin
+
+	# setup optim problem -
+	# Use the answer from Method 2 as a starting point 
+	xinitial = [0.025]
+	
+	# setup bounds -
+	L = 0.00001
+	U = 0.99999
+	
+	# setup the objective function -
+	OF(p) = fitness(p, C)
+    
+    # call the optimizer -
+    opt_result = optimize(OF, L, U, xinitial, Fminbox(BFGS()))
+
+	# show -
+	nothing
+end
+
+# ╔═╡ 31c3214b-38d4-4477-a295-6a406ada247a
+with_terminal() do
+	
+	bgfs_soln = Optim.minimizer(opt_result)[1]
+	println("IRR r̄ = $(bgfs_soln*100)%")
+end
 
 # ╔═╡ 0fc47d8a-ea9d-4537-9322-c8a93a1ac39b
 md"""
 ### Summary and Conclusions
-Fill me in.
+
+The installation of the computer-controlled lighting system from Johnson Controls has a positive net present value (NPV) for discount rates of less than approximately 8.5%. Beyond this discount rate, the alternative investment would be the preferred choice.
+
 """
 
 # ╔═╡ 5e4f6bb6-720b-447e-a180-67e2a02f2466
@@ -148,10 +244,14 @@ a {
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+Optim = "429524aa-4258-5aef-a3af-852621145aeb"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 
 [compat]
+Optim = "~1.7.0"
 Plots = "~1.31.1"
+PlutoUI = "~0.7.39"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -161,6 +261,12 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 julia_version = "1.7.3"
 manifest_format = "2.0"
 
+[[deps.AbstractPlutoDingetjes]]
+deps = ["Pkg"]
+git-tree-sha1 = "8eaf9f1b4921132a4cff3f36a1d9ba923b14a481"
+uuid = "6e696c72-6542-2067-7265-42206c756150"
+version = "1.1.4"
+
 [[deps.Adapt]]
 deps = ["LinearAlgebra"]
 git-tree-sha1 = "af92965fb30777147966f58acb05da51c5616b5f"
@@ -169,6 +275,12 @@ version = "3.3.3"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
+
+[[deps.ArrayInterfaceCore]]
+deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
+git-tree-sha1 = "7d255eb1d2e409335835dc8624c35d97453011eb"
+uuid = "30b0a656-2188-435a-8636-2ec0e6a096e2"
+version = "0.1.14"
 
 [[deps.Artifacts]]
 uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
@@ -224,11 +336,17 @@ git-tree-sha1 = "417b0ed7b8b838aa6ca0a87aadf1bb9eb111ce40"
 uuid = "5ae59095-9a9b-59fe-a467-6f913c188581"
 version = "0.12.8"
 
+[[deps.CommonSubexpressions]]
+deps = ["MacroTools", "Test"]
+git-tree-sha1 = "7b8a93dba8af7e3b42fecabf646260105ac373f7"
+uuid = "bbf7d656-a473-5ed7-a52c-81e309532950"
+version = "0.3.0"
+
 [[deps.Compat]]
-deps = ["Dates", "LinearAlgebra", "UUIDs"]
-git-tree-sha1 = "924cdca592bc16f14d2f7006754a621735280b74"
+deps = ["Base64", "Dates", "DelimitedFiles", "Distributed", "InteractiveUtils", "LibGit2", "Libdl", "LinearAlgebra", "Markdown", "Mmap", "Pkg", "Printf", "REPL", "Random", "SHA", "Serialization", "SharedArrays", "Sockets", "SparseArrays", "Statistics", "Test", "UUIDs", "Unicode"]
+git-tree-sha1 = "9be8be1d8a6f44b96482c8af52238ea7987da3e3"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "4.1.0"
+version = "3.45.0"
 
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -262,6 +380,22 @@ uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
 [[deps.DelimitedFiles]]
 deps = ["Mmap"]
 uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+
+[[deps.DiffResults]]
+deps = ["StaticArrays"]
+git-tree-sha1 = "c18e98cba888c6c25d1c3b048e4b3380ca956805"
+uuid = "163ba53b-c6d8-5494-b064-1a9d43ac40c5"
+version = "1.0.3"
+
+[[deps.DiffRules]]
+deps = ["IrrationalConstants", "LogExpFunctions", "NaNMath", "Random", "SpecialFunctions"]
+git-tree-sha1 = "28d605d9a0ac17118fe2c5e9ce0fbb76c3ceb120"
+uuid = "b552c78f-8df3-52c6-915a-8e097449b14b"
+version = "1.11.0"
+
+[[deps.Distributed]]
+deps = ["Random", "Serialization", "Sockets"]
+uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[deps.DocStringExtensions]]
 deps = ["LibGit2"]
@@ -300,6 +434,18 @@ version = "4.4.0+0"
 [[deps.FileWatching]]
 uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
+[[deps.FillArrays]]
+deps = ["LinearAlgebra", "Random", "SparseArrays", "Statistics"]
+git-tree-sha1 = "246621d23d1f43e3b9c368bf3b72b2331a27c286"
+uuid = "1a297f60-69ca-5386-bcde-b61e274b549b"
+version = "0.13.2"
+
+[[deps.FiniteDiff]]
+deps = ["ArrayInterfaceCore", "LinearAlgebra", "Requires", "SparseArrays", "StaticArrays"]
+git-tree-sha1 = "ee13c773ce60d9e95a6c6ea134f25605dce2eda3"
+uuid = "6a86dc24-6348-571c-b903-95158fe2bd41"
+version = "2.13.0"
+
 [[deps.FixedPointNumbers]]
 deps = ["Statistics"]
 git-tree-sha1 = "335bfdceacc84c5cdf16aadc768aa5ddfc5383cc"
@@ -317,6 +463,12 @@ deps = ["Printf"]
 git-tree-sha1 = "8339d61043228fdd3eb658d86c926cb282ae72a8"
 uuid = "59287772-0a20-5a39-b81b-1366585eb4c0"
 version = "0.4.2"
+
+[[deps.ForwardDiff]]
+deps = ["CommonSubexpressions", "DiffResults", "DiffRules", "LinearAlgebra", "LogExpFunctions", "NaNMath", "Preferences", "Printf", "Random", "SpecialFunctions", "StaticArrays"]
+git-tree-sha1 = "2f18915445b248731ec5db4e4a17e451020bf21e"
+uuid = "f6369f11-7733-5829-9624-2563aa707210"
+version = "0.10.30"
 
 [[deps.FreeType2_jll]]
 deps = ["Artifacts", "Bzip2_jll", "JLLWrappers", "Libdl", "Pkg", "Zlib_jll"]
@@ -388,6 +540,24 @@ deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll",
 git-tree-sha1 = "129acf094d168394e80ee1dc4bc06ec835e510a3"
 uuid = "2e76f6c2-a576-52d4-95c1-20adfe4de566"
 version = "2.8.1+1"
+
+[[deps.Hyperscript]]
+deps = ["Test"]
+git-tree-sha1 = "8d511d5b81240fc8e6802386302675bdf47737b9"
+uuid = "47d2ed2b-36de-50cf-bf87-49c2cf4b8b91"
+version = "0.0.4"
+
+[[deps.HypertextLiteral]]
+deps = ["Tricks"]
+git-tree-sha1 = "c47c5fa4c5308f27ccaac35504858d8914e102f9"
+uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
+version = "0.9.4"
+
+[[deps.IOCapture]]
+deps = ["Logging", "Random"]
+git-tree-sha1 = "f7be53659ab06ddc986428d3a9dcc95f6fa6705a"
+uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
+version = "0.2.2"
 
 [[deps.IniFile]]
 git-tree-sha1 = "f550e6e32074c939295eb5ea6de31849ac2c9625"
@@ -533,6 +703,12 @@ git-tree-sha1 = "7f3efec06033682db852f8b3bc3c1d2b0a0ab066"
 uuid = "38a345b3-de98-5d2b-a5d3-14cd9215e700"
 version = "2.36.0+0"
 
+[[deps.LineSearches]]
+deps = ["LinearAlgebra", "NLSolversBase", "NaNMath", "Parameters", "Printf"]
+git-tree-sha1 = "f27132e551e959b3667d8c93eae90973225032dd"
+uuid = "d3d80556-e9d4-5f37-9878-2ab0fcc64255"
+version = "7.1.1"
+
 [[deps.LinearAlgebra]]
 deps = ["Libdl", "libblastrampoline_jll"]
 uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
@@ -583,10 +759,16 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 [[deps.MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
 
+[[deps.NLSolversBase]]
+deps = ["DiffResults", "Distributed", "FiniteDiff", "ForwardDiff"]
+git-tree-sha1 = "50310f934e55e5ca3912fb941dec199b49ca9b68"
+uuid = "d41bc354-129a-5804-8e4c-c37616107c6c"
+version = "7.8.2"
+
 [[deps.NaNMath]]
-git-tree-sha1 = "737a5957f387b17e74d4ad2f440eb330b39a62c5"
+git-tree-sha1 = "b086b7ea07f8e38cf122f5016af580881ac914fe"
 uuid = "77ba4419-2d1f-58cd-9bb1-8ffee604a2e3"
-version = "1.0.0"
+version = "0.3.7"
 
 [[deps.NetworkOptions]]
 uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
@@ -617,6 +799,12 @@ git-tree-sha1 = "13652491f6856acfd2db29360e1bbcd4565d04f1"
 uuid = "efe28fd5-8261-553b-a9e1-b2916fc3738e"
 version = "0.5.5+0"
 
+[[deps.Optim]]
+deps = ["Compat", "FillArrays", "ForwardDiff", "LineSearches", "LinearAlgebra", "NLSolversBase", "NaNMath", "Parameters", "PositiveFactorizations", "Printf", "SparseArrays", "StatsBase"]
+git-tree-sha1 = "7a28efc8e34d5df89fc87343318b0a8add2c4021"
+uuid = "429524aa-4258-5aef-a3af-852621145aeb"
+version = "1.7.0"
+
 [[deps.Opus_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "51a08fb14ec28da2ec7a927c4337e4332c2a4720"
@@ -633,6 +821,12 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "b2a7af664e098055a7529ad1a900ded962bca488"
 uuid = "2f80f16e-611a-54ab-bc61-aa92de5b98fc"
 version = "8.44.0+0"
+
+[[deps.Parameters]]
+deps = ["OrderedCollections", "UnPack"]
+git-tree-sha1 = "34c0e9ad262e5f7fc75b10a9952ca7692cfc5fbe"
+uuid = "d96e819e-fc66-5662-9728-84c9c7592b0a"
+version = "0.12.3"
 
 [[deps.Parsers]]
 deps = ["Dates"]
@@ -667,6 +861,18 @@ deps = ["Base64", "Contour", "Dates", "Downloads", "FFMPEG", "FixedPointNumbers"
 git-tree-sha1 = "93e82cebd5b25eb33068570e3f63a86be16955be"
 uuid = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 version = "1.31.1"
+
+[[deps.PlutoUI]]
+deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "Markdown", "Random", "Reexport", "UUIDs"]
+git-tree-sha1 = "8d1f54886b9037091edf146b517989fc4a09efec"
+uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
+version = "0.7.39"
+
+[[deps.PositiveFactorizations]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "17275485f373e6673f7e7f97051f703ed5b15b20"
+uuid = "85a6dd25-e78a-55b7-8502-1745935b8125"
+version = "0.2.4"
 
 [[deps.Preferences]]
 deps = ["TOML"]
@@ -732,6 +938,10 @@ version = "1.1.0"
 [[deps.Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 
+[[deps.SharedArrays]]
+deps = ["Distributed", "Mmap", "Random", "Serialization"]
+uuid = "1a1011a3-84de-559e-8e89-a11a2f7dc383"
+
 [[deps.Showoff]]
 deps = ["Dates", "Grisu"]
 git-tree-sha1 = "91eddf657aca81df9ae6ceb20b959ae5653ad1de"
@@ -790,6 +1000,10 @@ git-tree-sha1 = "ec47fb6069c57f1cee2f67541bf8f23415146de7"
 uuid = "09ab397b-f2b6-538f-b94a-2f83cf4a842a"
 version = "0.6.11"
 
+[[deps.SuiteSparse]]
+deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
+uuid = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
+
 [[deps.TOML]]
 deps = ["Dates"]
 uuid = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
@@ -820,6 +1034,11 @@ version = "0.1.1"
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
+[[deps.Tricks]]
+git-tree-sha1 = "6bac775f2d42a611cdfcd1fb217ee719630c4175"
+uuid = "410a4b4d-49e4-4fbc-ab6d-cb71b17b3775"
+version = "0.1.6"
+
 [[deps.URIs]]
 git-tree-sha1 = "97bbe755a53fe859669cd907f2d96aee8d2c1355"
 uuid = "5c2747f8-b7ea-4ff2-ba2e-563bfd36b1d4"
@@ -828,6 +1047,11 @@ version = "1.3.0"
 [[deps.UUIDs]]
 deps = ["Random", "SHA"]
 uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
+
+[[deps.UnPack]]
+git-tree-sha1 = "387c1f73762231e86e0c9c5443ce3b4a0a9a0c2b"
+uuid = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
+version = "1.0.2"
 
 [[deps.Unicode]]
 uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
@@ -1061,13 +1285,22 @@ version = "0.9.1+5"
 # ╔═╡ Cell order:
 # ╟─5f67cb59-c3bb-4b61-9c59-7739ae15c461
 # ╟─ed0de4a8-ec5f-46ce-bda9-ce923297a4a6
-# ╠═0f083a37-544d-4e15-adc5-7dac34b690ef
+# ╟─0f083a37-544d-4e15-adc5-7dac34b690ef
 # ╟─ea6b4690-5aa7-478f-9784-897104d426be
 # ╠═857f37a5-c8fc-4259-bbee-0b04bd8a401d
 # ╠═0c541f24-bd77-466e-bbb6-41992cb15bf9
+# ╠═38b1b24f-65e6-4685-bacc-a45efc3d1f3f
 # ╟─4b93f2a6-6608-44b5-9037-6afa3c00b524
+# ╟─eef2e742-2174-45c0-88d5-00adcd5c808a
 # ╠═9ae8618c-5b1c-4198-a8ad-cfea6b6e2a4d
-# ╠═c203133b-9e69-487f-b1dc-e0f5665d1c5d
+# ╠═bff4e4e0-1137-4dfa-8d07-01f00002b634
+# ╟─b468ba33-b943-4d81-82d6-63091e2eb092
+# ╠═9dfe40dd-72a9-484f-b5de-dfe0ff0666ec
+# ╟─e78caf64-87c4-4306-8e7d-56614e9f184d
+# ╟─47185ca6-0c68-4a7c-b052-451f4d457de9
+# ╟─42256d05-6e1b-4292-9656-4366084a24e0
+# ╠═8d676d60-5de6-4447-bc2a-d48463ca9e4a
+# ╟─31c3214b-38d4-4477-a295-6a406ada247a
 # ╟─0fc47d8a-ea9d-4537-9322-c8a93a1ac39b
 # ╟─5e4f6bb6-720b-447e-a180-67e2a02f2466
 # ╟─7854c0be-fc82-11ec-1b4c-8b2975514264
