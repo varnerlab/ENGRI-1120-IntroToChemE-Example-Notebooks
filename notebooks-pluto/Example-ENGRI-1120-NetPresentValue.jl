@@ -212,7 +212,9 @@ end
 md"""
 ### Summary and Conclusions
 
-The installation of the computer-controlled lighting system from Johnson Controls has a positive net present value (NPV) for discount rates less than 8.5%. However, the alternative investment would be the preferred choice beyond this discount rate.
+In this example, we reviewed the concept of the net present value (NPV); net present value is the sum of the current and future cash flows computed over the time horizon $t=1\rightarrow{T}$, corrected to current dollars ($t=1$). 
+
+We considered the case of the installation of a computer-controlled lighting system. The installation of the computer-controlled lighting system from Johnson Controls had a positive net present value (NPV) for discount rates less than 8.5%. However, the alternative investment would be the preferred choice beyond this discount rate.
 
 """
 
@@ -220,7 +222,7 @@ The installation of the computer-controlled lighting system from Johnson Control
 md"""
 ### Additional Reading and Resources
 
-__Taken__: A Refresher on Net Present Value, Amy Gallo, HBR, 11/19/14
+* [A Refresher on Net Present Value, Amy Gallo, Harvard Business Review (HBR), 11/19/14](https://hbr.org/2014/11/a-refresher-on-net-present-value)
 """
 
 # ╔═╡ 7854c0be-fc82-11ec-1b4c-8b2975514264
@@ -1284,7 +1286,7 @@ version = "0.9.1+5"
 
 # ╔═╡ Cell order:
 # ╟─5f67cb59-c3bb-4b61-9c59-7739ae15c461
-# ╟─ed0de4a8-ec5f-46ce-bda9-ce923297a4a6
+# ╠═ed0de4a8-ec5f-46ce-bda9-ce923297a4a6
 # ╟─0f083a37-544d-4e15-adc5-7dac34b690ef
 # ╟─ea6b4690-5aa7-478f-9784-897104d426be
 # ╠═857f37a5-c8fc-4259-bbee-0b04bd8a401d
