@@ -46,7 +46,7 @@ function simulate_species_mass_balances(config::Dict{String,Any}; σ::Float64 = 
     return (T, X)
 end
 
-function simulate_total_mass_balances(config::Dict{String,Any}; α::Float64 = 0.0)
+function simulate_total_mass_balances(config::Dict{String,Any}; σ::Float64 = 0.0)
 
     # setup:
     # we have a mixing process
