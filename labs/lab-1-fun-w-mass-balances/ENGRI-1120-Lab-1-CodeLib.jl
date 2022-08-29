@@ -80,7 +80,6 @@ function simulate_total_mass_balances(config::Dict{String,Any}; α::Float64 = 0.
         ṁ₃ = κ * X[t, 1]
 
         # update the state array -
-        X[t+1, 1] = X[t, 1] + h * (ṁ₁ + ṁ₂ - ṁ₃) + σ * sqrt(h) * rand(Z)
     end
 
     # return -

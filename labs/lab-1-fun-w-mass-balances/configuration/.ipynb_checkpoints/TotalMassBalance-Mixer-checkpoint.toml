@@ -1,0 +1,12 @@
+[parameters]
+m_dot_in_1 = 8.0            # units: kg/hr 
+m_dot_in_2 = 12.0           # units: kg/hr
+w_in_1 = [1.0,0.0,0.0]      # mass fractions stream 1
+w_in_2 = [0.0,0.6,0.4]      # mass fractions stream 2
+kappa = 2.5                 # kappa parameters
+M = 1                       # number of species
+
+[simulation]
+h = 0.016666666666666666    # simulation step size (units: hr)
+T1 = 0.0                    # start time (units: hr)
+T2 = 12.0                   # start time (units: hr)
