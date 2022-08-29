@@ -67,8 +67,8 @@ function simulate_total_mass_balances(config::Dict{String,Any}; α::Float64 = 0.
     X = zeros(ℒ, ℳ)
 
     # setup the input and outputs -
-    ṁ₁ = config["parameters"]["m_dot_in_1"]     # total mass flow rate stream 1 (units: kg/hr)
-    ṁ₂ = config["parameters"]["m_dot_in_2"]     # total mass flow rate stream 2 (units: kg/hr)
+    ṁ₁ = config["parameters"]["m_dot_in_1"]     # total mass flow rate stream 1 (units: kg/hr)
+    ṁ₂ = config["parameters"]["m_dot_in_2"]     # total mass flow rate stream 2 (units: kg/hr)
 
     # κ value -
     κ = config["parameters"]["kappa"]
@@ -77,10 +77,10 @@ function simulate_total_mass_balances(config::Dict{String,Any}; α::Float64 = 0.
     for t ∈ 1:(ℒ-1)
 
         # compute the mass out -
-        ṁ₃ = κ * X[t, 1]
+        ṁ₃ = κ * X[t, 1]
 
         # update the state array -
-        X[t+1, 1] = X[t, 1] + h * (ṁ₁ + ṁ₂ - ṁ₃) + σ * sqrt(h) * rand(Z)
+        X[t+1, 1] = X[t, 1] + h * (ṁ₁ + ṁ₂ - ṁ₃) + σ * sqrt(h) * rand(Z)
     end
 
     # return -
