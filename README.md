@@ -12,9 +12,9 @@ The example notebooks used in lecture, and referenced from the book, are written
 
 1. [Install Julia (we are using v1.8, but future versions of Julia should also work)](https://julialang.org/downloads/)
 1. [Install Pluto.jl](https://github.com/fonsp/Pluto.jl#installation)
-1. Clone this repo:
+1. Download the code contained in the repo as a zip (green code button). Alternatively, you can clone the repo:
     ```bash
-    git clone https://github.com/varnerlab/CHEME-5660-Markets-Mayhem-Example-Notebooks
+    git clone https://github.com/varnerlab/ENGRI-1120-IntroToChemE-Example-Notebooks
     ```
 1. From the Julia REPL (`julia`), run Pluto (a web browser window will pop-up):
     ```julia
