@@ -12,6 +12,7 @@ begin
 	using PlutoUI
 	using CSV
 	using DataFrames
+	using Colors
 	
 	# setup paths -
 	const _ROOT = pwd()
@@ -173,18 +174,20 @@ begin
 	# skip factor -
 	skip = 100
 	
-	plot(liquid_line[:,1], liquid_line[:,2], lw=3, label="Liquid", legend=:topleft)
-	plot!(vapor_line[:,1], vapor_line[:,2], lw=3, label="Vapor")
+	plot(liquid_line[:,1], liquid_line[:,2], lw=3, label="Liquid", legend=:topleft, bg="floralwhite", 
+		background_color_outside="white", framestyle = :box, fg_legend = :transparent, 
+		c=colorant"#0068AC")
+	plot!(vapor_line[:,1], vapor_line[:,2], lw=3, label="Vapor", c=colorant"#EF4035")
 	scatter!(liquid_line[1:skip:number_of_pairs,1],liquid_line[1:skip:number_of_pairs,2],
-		mc=:white, msc=:blue, label="")
+		mc=:white, msc=colorant"#0068AC", label="")
 	scatter!(vapor_line[1:skip:number_of_pairs,1],vapor_line[1:skip:number_of_pairs,2],
-		mc=:white, msc=:red, label="")
+		mc=:white, msc=colorant"#EF4035", label="")
 	scatter!(vapor_line[end-1:end,1],vapor_line[end-1:end,2], mc=:white, msc=:red, label="")
 	xlabel!("Mole fraction x₁ and y₁", fontsize=18)
 	ylabel!("Pressure (kPa)", fontsize=18)
 
 	# uncomment me to save the figure to disk -
-	# savefig(joinpath(_PATH_TO_FIGS,"Fig-Pxy-acetone-water-70C.pdf"))
+	# savefig(joinpath(_PATH_TO_FIGS,"Fig-Pxy-acetone-water-80C.pdf"))
 end
 
 # ╔═╡ c270a5e8-62a7-455d-85b7-871bbd3090fb
@@ -214,6 +217,7 @@ a {
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+Colors = "5ae59095-9a9b-59fe-a467-6f913c188581"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Optim = "429524aa-4258-5aef-a3af-852621145aeb"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
@@ -221,6 +225,7 @@ PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 
 [compat]
 CSV = "~0.10.4"
+Colors = "~0.12.8"
 DataFrames = "~1.4.1"
 Optim = "~1.7.3"
 Plots = "~1.35.3"
@@ -233,7 +238,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.2"
 manifest_format = "2.0"
-project_hash = "c804eb020c5daf85a01d40d89bfef12c63175e1f"
+project_hash = "45e181218b21cd80809dca39489bf13f8e7eef03"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
