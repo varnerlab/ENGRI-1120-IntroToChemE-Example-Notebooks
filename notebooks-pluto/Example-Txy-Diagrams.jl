@@ -4,43 +4,43 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 78cc0672-a20d-4ed8-a230-472bad939c61
+# ╔═╡ ffc8cdc5-6d1d-4e24-be13-a2524b4a314e
 begin
-	# load Julia packages -
+
+	# load packages -
+	using DataFrames
+	using CSV
 	using Plots
 	using Optim
-	using PlutoUI
-	using CSV
-	using DataFrames
 	using Colors
 	
 	# setup paths -
 	const _ROOT = pwd()
 	const _PATH_TO_DATA = joinpath(_ROOT, "data")
 	const _PATH_TO_FIGS = joinpath(_ROOT, "figs")
-	
+
 	# show -
 	nothing
 end
 
-# ╔═╡ f4558ed6-4882-11ed-050e-c1392fc20473
+# ╔═╡ a87ed53e-4946-11ed-2132-3124f6317045
 md"""
-### ENGRI 1120: Computing Ideal Pressure and Temperature Composition Phase Diagrams
+### ENGRI 1120: Computing Ideal Temperature Composition Phase Diagrams
 Jeffrey D. Varner, Smith School of Chemical and Biomolecular Engineering, Cornell University, Ithaca, NY 14850
 """
 
-# ╔═╡ 013687b8-4b4a-4109-99eb-0bcb643ccd35
+# ╔═╡ ebd848af-5070-4f69-bd86-e9fd9a9509cd
 md"""
-### Introduction
+#### Introduction
 Fill me in
 """
 
-# ╔═╡ 62976a12-118e-4dec-85ec-f31e87bd7d5e
+# ╔═╡ 2ba49a96-6b0b-4c2d-a618-1d37b4d995a5
 md"""
-### Materials and Methods
+#### Materials and Methods
 """
 
-# ╔═╡ 2da44d88-22ca-4782-93a9-9b0dbd84b0e0
+# ╔═╡ 749e1ce9-e4ec-49dd-8579-eeeccec472c9
 mutable struct ChemicalCompoundModel
 
 	# data -
@@ -56,7 +56,29 @@ mutable struct ChemicalCompoundModel
 	ChemicalCompoundModel() = new()
 end
 
-# ╔═╡ c0f16034-33b9-4372-b213-2ba10d4ef55f
+# ╔═╡ e4398c32-4554-4e6b-9ce4-5c96358a9e4d
+function saturation_pressure(compound::String, data_dictionary::Dict{String,ChemicalCompoundModel},
+	T::Float64)::Float64
+
+	# use Antoine's equation to estimate saturation pressure
+
+	# initialize -
+	sat_pressure::Float64 = 0.0
+
+	# look up the model, and get parameters -
+	model = data_dictionary[compound]
+	A = model.A
+	B = model.B
+	C = model.C
+
+	# compute -
+	sat_pressure = exp(A - B/(T+C))
+	
+	# return -
+	return sat_pressure
+end
+
+# ╔═╡ 38a4c1db-77ed-4c15-aeb4-21eed33d8ecf
 function build_compound_dictionary(data::DataFrame)::Dict{String,ChemicalCompoundModel}
 
 	# initialize -
@@ -90,112 +112,133 @@ function build_compound_dictionary(data::DataFrame)::Dict{String,ChemicalCompoun
 	return compound_dictionary
 end
 
-# ╔═╡ 264e35a0-6832-4935-bb73-da22eaac7a45
-function saturation_pressure(compound::String, data_dictionary::Dict{String,ChemicalCompoundModel},
-	T::Float64)::Float64
+# ╔═╡ 25a21854-9b5d-4c8e-8f08-b445e012c70d
+function objective_function_binary(κ, P, x₁, s₁, s₂, compound_data_dictionary)
 
-	# use Antoine's equation to estimate saturation pressure
-
-	# initialize -
-	sat_pressure::Float64 = 0.0
-
-	# look up the model, and get parameters -
-	model = data_dictionary[compound]
-	A = model.A
-	B = model.B
-	C = model.C
-
-	# compute -
-	sat_pressure = exp(A - B/(T+C))
-	
-	# return -
-	return sat_pressure
-end
-
-# ╔═╡ 968268ea-0723-4007-a3fc-e69f5ff3553f
-md"""
-### Results
-"""
-
-# ╔═╡ cbe1d895-6f2c-4cef-8ae9-1b5f7e2d657f
-# Load that data into a DataFrame -
-df = CSV.read(joinpath(_PATH_TO_DATA,"SVNA-8ed-Table-B2.csv"), DataFrame)
-
-# ╔═╡ 92986125-0712-42a6-adc3-0ab710c1c1b9
-# build the compound dictionary -
-compound_data_dictionary = build_compound_dictionary(df);
-
-# ╔═╡ c20a4557-897d-4242-95dc-876fe67a07e0
-md"""
-##### a) Build pressure composition (Pxy) diagram
-"""
-
-# ╔═╡ 7cf6b1ff-9ae2-4cbd-837a-da2f25864a06
-begin
-
-	# pick two compounds -
-	species_1 = "Acetone"
-	species_2 = "Water"
-	T = 80.0; # units: C
-
-	# how many composition pairs do we want?
-	number_of_pairs = 1000
-	x₁_array = range(0.0,stop=1.0, length=number_of_pairs) |> collect
- 
-	# initialize storage 0
-	liquid_line = Array{Float64,2}(undef, number_of_pairs, 2)
-	vapor_line = Array{Float64,2}(undef, number_of_pairs, 2)
+	# grab the temperature guess -
+	T = κ[1]
 
 	# compute the saturation pressures -
-	P₁_sat = saturation_pressure(species_1, compound_data_dictionary, T)
-	P₂_sat = saturation_pressure(species_2, compound_data_dictionary, T)
+	P₁_sat = saturation_pressure(s₁, compound_data_dictionary, T)
+	P₂_sat = saturation_pressure(s₂, compound_data_dictionary, T)
+
+	# compute model pressure -
+	P_model = x₁*P₁_sat + (1-x₁)*P₂_sat
+
+	# return (diff)^2
+	return (P - P_model)^2
+end
+
+# ╔═╡ ea66086f-9784-4b28-bfef-a57c9d0324f4
+md"""
+#### Results
+"""
+
+# ╔═╡ c2c99030-4e5f-4519-aa85-e87959669d52
+md"""
+##### Load compound dictionary
+"""
+
+# ╔═╡ ba558fc3-5244-40b8-9646-8e177a3a6506
+df = CSV.read(joinpath(_PATH_TO_DATA,"SVNA-8ed-Table-B2.csv"), DataFrame);
+
+# ╔═╡ 1b6ab6d6-dee5-4efc-83e6-b471919aa18c
+compound_data_dictionary = build_compound_dictionary(df);
+
+# ╔═╡ d9ba2b65-1317-4692-8df0-f43038fd8a8f
+md"""
+##### Estimate the liquid line
+"""
+
+# ╔═╡ 4eb37b1e-c4d9-4843-8c19-b6997550357e
+begin
+
+	# setup liquid line calculation -
+	P = 125.0 # units: kPa
+	s₁ = "Acetone"
+	s₂ = "Water"
+
+	# number of points -
+	number_of_points = 1000
+	x₁_array = range(0.0, stop=1.0, length=number_of_points) |> collect
+	liquid_array = Array{Float64,2}(undef, number_of_points, 2)
 
 	# main loop -
-	for i ∈ 1:number_of_pairs
+	for i ∈ 1:number_of_points
 
-		# compute the liquid line -
+		# get the composition -
 		x₁ = x₁_array[i]
-		x₂ = (1 - x₁)
-		P = x₁*P₁_sat + x₂*P₂_sat
-		liquid_line[i,1] = x₁
-		liquid_line[i,2] = P
 
-		# compute the vapor line -
-		y₁ = (x₁*P₁_sat)*(1/P)
-		vapor_line[i,1] = y₁
-		vapor_line[i,2] = P
-		
+		# setup optimization problem -
+		OF(κ) =  objective_function_binary(κ, P, x₁, s₁, s₂, compound_data_dictionary)
+
+		# optimize -
+		result = optimize(OF, 0.0, 150.0, Brent())
+
+		# grab the result -
+		T_min = Optim.minimizer(result)
+		liquid_array[i,1] = x₁
+		liquid_array[i,2] = T_min
 	end
 end
 
-# ╔═╡ bf8c43c7-26f4-4b3d-b8d4-60536110938b
+# ╔═╡ 767dd57f-3671-403b-86fb-d114b2ab9830
+md"""
+##### Estimate the vapor line
+"""
+
+# ╔═╡ f694931d-c8c2-4d27-b762-e8f1b7e4bff4
 begin
 
+	# initialize -
+	vapor_array = Array{Float64,2}(undef, number_of_points, 2)
+
+	# main loop -
+	for i ∈ 1:number_of_points
+
+		# get data from the liquid array -
+		x₁ = liquid_array[i,1]
+		T = liquid_array[i,2]
+
+		# compute sat pressure for components 1 -
+		P₁_sat = saturation_pressure(s₁, compound_data_dictionary, T)
+		
+		# compute y₁ -
+		y₁ = (1/P)*x₁*P₁_sat
+
+		# store -
+		vapor_array[i,1] = y₁
+		vapor_array[i,2] = T
+	end
+end
+
+# ╔═╡ 8dfa7483-da54-463d-b57d-d7865f0de85c
+md"""
+##### Visualize
+"""
+
+# ╔═╡ 1fdae509-6f00-419d-af14-4cdd9e8c976d
+begin
 	# skip factor -
 	skip = 100
 	
-	plot(liquid_line[:,1], liquid_line[:,2], lw=3, label="Liquid", legend=:topleft, bg="floralwhite", 
+	plot(liquid_array[:,1], liquid_array[:,2], lw=3, label="Liquid", legend=:topright, bg="floralwhite", 
 		background_color_outside="white", framestyle = :box, fg_legend = :transparent, 
 		c=colorant"#0068AC")
-	plot!(vapor_line[:,1], vapor_line[:,2], lw=3, label="Vapor", c=colorant"#EF4035")
-	scatter!(liquid_line[1:skip:number_of_pairs,1],liquid_line[1:skip:number_of_pairs,2],
+	plot!(vapor_array[:,1], vapor_array[:,2], lw=3, label="Vapor", c=colorant"#EF4035")
+	scatter!(liquid_array[1:skip:number_of_points,1],liquid_array[1:skip:number_of_points,2],
 		mc=:white, msc=colorant"#0068AC", label="")
-	scatter!(vapor_line[1:skip:number_of_pairs,1],vapor_line[1:skip:number_of_pairs,2],
+	scatter!(vapor_array[1:skip:number_of_points,1],vapor_array[1:skip:number_of_points,2],
 		mc=:white, msc=colorant"#EF4035", label="")
-	scatter!(vapor_line[end-1:end,1],vapor_line[end-1:end,2], mc=:white, msc=:red, label="")
+	scatter!(vapor_array[end-1:end,1],vapor_array[end-1:end,2], mc=:white, msc=:red, label="")
 	xlabel!("Mole fraction x₁ and y₁", fontsize=18)
-	ylabel!("Pressure (kPa)", fontsize=18)
+	ylabel!("Temperature (degrees C)", fontsize=18)
 
-	# uncomment me to save the figure to disk -
-	# savefig(joinpath(_PATH_TO_FIGS,"Fig-Pxy-acetone-water-80C.pdf"))
+	# uncomment me to save to disk -
+	# savefig(joinpath(_PATH_TO_FIGS, "Fig-Txy-acetone-water-P125Pka.pdf"))
 end
 
-# ╔═╡ c270a5e8-62a7-455d-85b7-871bbd3090fb
-md"""
-##### b) Build temperature composition (Txy) diagram
-"""
-
-# ╔═╡ 7961932f-2acc-46e8-b27f-e699a43a0be9
+# ╔═╡ 4125373e-cd74-4b19-b930-dfa6b7722588
 html"""
 <style>
 main {
@@ -221,7 +264,6 @@ Colors = "5ae59095-9a9b-59fe-a467-6f913c188581"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Optim = "429524aa-4258-5aef-a3af-852621145aeb"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
-PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 
 [compat]
 CSV = "~0.10.4"
@@ -229,7 +271,6 @@ Colors = "~0.12.8"
 DataFrames = "~1.4.1"
 Optim = "~1.7.3"
 Plots = "~1.35.3"
-PlutoUI = "~0.7.43"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -238,13 +279,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.2"
 manifest_format = "2.0"
-project_hash = "45e181218b21cd80809dca39489bf13f8e7eef03"
-
-[[deps.AbstractPlutoDingetjes]]
-deps = ["Pkg"]
-git-tree-sha1 = "8eaf9f1b4921132a4cff3f36a1d9ba923b14a481"
-uuid = "6e696c72-6542-2067-7265-42206c756150"
-version = "1.1.4"
+project_hash = "bd7ef0100b1a7f68fe676745200a9f2fa4768f42"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -548,24 +583,6 @@ deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll",
 git-tree-sha1 = "129acf094d168394e80ee1dc4bc06ec835e510a3"
 uuid = "2e76f6c2-a576-52d4-95c1-20adfe4de566"
 version = "2.8.1+1"
-
-[[deps.Hyperscript]]
-deps = ["Test"]
-git-tree-sha1 = "8d511d5b81240fc8e6802386302675bdf47737b9"
-uuid = "47d2ed2b-36de-50cf-bf87-49c2cf4b8b91"
-version = "0.0.4"
-
-[[deps.HypertextLiteral]]
-deps = ["Tricks"]
-git-tree-sha1 = "c47c5fa4c5308f27ccaac35504858d8914e102f9"
-uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
-version = "0.9.4"
-
-[[deps.IOCapture]]
-deps = ["Logging", "Random"]
-git-tree-sha1 = "f7be53659ab06ddc986428d3a9dcc95f6fa6705a"
-uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
-version = "0.2.2"
 
 [[deps.IniFile]]
 git-tree-sha1 = "f550e6e32074c939295eb5ea6de31849ac2c9625"
@@ -908,12 +925,6 @@ git-tree-sha1 = "524d9ff1b2f4473fef59678c06f9f77160a204b1"
 uuid = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 version = "1.35.3"
 
-[[deps.PlutoUI]]
-deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "Markdown", "Random", "Reexport", "UUIDs"]
-git-tree-sha1 = "2777a5c2c91b3145f5aa75b61bb4c2eb38797136"
-uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-version = "0.7.43"
-
 [[deps.PooledArrays]]
 deps = ["DataAPI", "Future"]
 git-tree-sha1 = "a6062fe4063cdafe78f4a0a81cfffb89721b30e7"
@@ -1118,11 +1129,6 @@ deps = ["Random", "Test"]
 git-tree-sha1 = "8a75929dcd3c38611db2f8d08546decb514fcadf"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
 version = "0.9.9"
-
-[[deps.Tricks]]
-git-tree-sha1 = "6bac775f2d42a611cdfcd1fb217ee719630c4175"
-uuid = "410a4b4d-49e4-4fbc-ab6d-cb71b17b3775"
-version = "0.1.6"
 
 [[deps.URIs]]
 git-tree-sha1 = "e59ecc5a41b000fa94423a578d29290c7266fc10"
@@ -1390,20 +1396,24 @@ version = "1.4.1+0"
 """
 
 # ╔═╡ Cell order:
-# ╟─f4558ed6-4882-11ed-050e-c1392fc20473
-# ╟─013687b8-4b4a-4109-99eb-0bcb643ccd35
-# ╟─62976a12-118e-4dec-85ec-f31e87bd7d5e
-# ╠═78cc0672-a20d-4ed8-a230-472bad939c61
-# ╠═2da44d88-22ca-4782-93a9-9b0dbd84b0e0
-# ╠═c0f16034-33b9-4372-b213-2ba10d4ef55f
-# ╠═264e35a0-6832-4935-bb73-da22eaac7a45
-# ╟─968268ea-0723-4007-a3fc-e69f5ff3553f
-# ╠═cbe1d895-6f2c-4cef-8ae9-1b5f7e2d657f
-# ╠═92986125-0712-42a6-adc3-0ab710c1c1b9
-# ╟─c20a4557-897d-4242-95dc-876fe67a07e0
-# ╠═7cf6b1ff-9ae2-4cbd-837a-da2f25864a06
-# ╠═bf8c43c7-26f4-4b3d-b8d4-60536110938b
-# ╟─c270a5e8-62a7-455d-85b7-871bbd3090fb
-# ╟─7961932f-2acc-46e8-b27f-e699a43a0be9
+# ╟─a87ed53e-4946-11ed-2132-3124f6317045
+# ╟─ebd848af-5070-4f69-bd86-e9fd9a9509cd
+# ╟─2ba49a96-6b0b-4c2d-a618-1d37b4d995a5
+# ╠═ffc8cdc5-6d1d-4e24-be13-a2524b4a314e
+# ╠═749e1ce9-e4ec-49dd-8579-eeeccec472c9
+# ╠═e4398c32-4554-4e6b-9ce4-5c96358a9e4d
+# ╠═38a4c1db-77ed-4c15-aeb4-21eed33d8ecf
+# ╠═25a21854-9b5d-4c8e-8f08-b445e012c70d
+# ╟─ea66086f-9784-4b28-bfef-a57c9d0324f4
+# ╟─c2c99030-4e5f-4519-aa85-e87959669d52
+# ╠═ba558fc3-5244-40b8-9646-8e177a3a6506
+# ╠═1b6ab6d6-dee5-4efc-83e6-b471919aa18c
+# ╟─d9ba2b65-1317-4692-8df0-f43038fd8a8f
+# ╠═4eb37b1e-c4d9-4843-8c19-b6997550357e
+# ╟─767dd57f-3671-403b-86fb-d114b2ab9830
+# ╠═f694931d-c8c2-4d27-b762-e8f1b7e4bff4
+# ╟─8dfa7483-da54-463d-b57d-d7865f0de85c
+# ╠═1fdae509-6f00-419d-af14-4cdd9e8c976d
+# ╟─4125373e-cd74-4b19-b930-dfa6b7722588
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
