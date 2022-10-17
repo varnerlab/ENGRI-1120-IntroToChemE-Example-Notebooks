@@ -183,7 +183,7 @@ begin
 	scatter!(vapor_line[1:skip:number_of_pairs,1],vapor_line[1:skip:number_of_pairs,2],
 		mc=:white, msc=colorant"#EF4035", label="")
 	scatter!(vapor_line[end-1:end,1],vapor_line[end-1:end,2], mc=:white, msc=:red, label="")
-	xlabel!("Mole fraction x₁ and y₁", fontsize=18)
+	xlabel!("Mole fraction x₁ or y₁", fontsize=18)
 	ylabel!("Pressure (kPa)", fontsize=18)
 
 	# uncomment me to save the figure to disk -
@@ -238,7 +238,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.2"
 manifest_format = "2.0"
-project_hash = "45e181218b21cd80809dca39489bf13f8e7eef03"
+project_hash = "1581d36b1d7b3cd1d3a954cc5a00dc67d0be45db"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]

@@ -231,12 +231,15 @@ begin
 	scatter!(vapor_array[1:skip:number_of_points,1],vapor_array[1:skip:number_of_points,2],
 		mc=:white, msc=colorant"#EF4035", label="")
 	scatter!(vapor_array[end-1:end,1],vapor_array[end-1:end,2], mc=:white, msc=:red, label="")
-	xlabel!("Mole fraction x₁ and y₁", fontsize=18)
+	xlabel!("Mole fraction x₁ or y₁", fontsize=18)
 	ylabel!("Temperature (degrees C)", fontsize=18)
 
 	# uncomment me to save to disk -
 	# savefig(joinpath(_PATH_TO_FIGS, "Fig-Txy-acetone-water-P125Pka.pdf"))
 end
+
+# ╔═╡ 4e193fe8-3117-4414-8165-4469a3745714
+
 
 # ╔═╡ 4125373e-cd74-4b19-b930-dfa6b7722588
 html"""
@@ -279,7 +282,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.2"
 manifest_format = "2.0"
-project_hash = "bd7ef0100b1a7f68fe676745200a9f2fa4768f42"
+project_hash = "e408d2e2e6f24e8c142b4e88204f60e354a36b91"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -1414,6 +1417,7 @@ version = "1.4.1+0"
 # ╠═f694931d-c8c2-4d27-b762-e8f1b7e4bff4
 # ╟─8dfa7483-da54-463d-b57d-d7865f0de85c
 # ╠═1fdae509-6f00-419d-af14-4cdd9e8c976d
+# ╠═4e193fe8-3117-4414-8165-4469a3745714
 # ╟─4125373e-cd74-4b19-b930-dfa6b7722588
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
