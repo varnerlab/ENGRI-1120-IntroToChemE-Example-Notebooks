@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.13
+# v0.19.14
 
 using Markdown
 using InteractiveUtils
@@ -145,6 +145,13 @@ df = CSV.read(joinpath(_PATH_TO_DATA,"SVNA-8ed-Table-B2.csv"), DataFrame);
 # ╔═╡ 1b6ab6d6-dee5-4efc-83e6-b471919aa18c
 compound_data_dictionary = build_compound_dictionary(df);
 
+# ╔═╡ c3de593c-00fe-4e7c-99ae-c0e9c0688282
+# load experimental data -
+df_exp = CSV.read(joinpath(_PATH_TO_DATA,"Acetone-Water-Txy-Data-P101_325-kPa.csv"), DataFrame);
+
+# ╔═╡ 6ef5c970-903b-442c-acc3-076d78df9e14
+df_exp
+
 # ╔═╡ d9ba2b65-1317-4692-8df0-f43038fd8a8f
 md"""
 ##### Estimate the liquid line
@@ -154,7 +161,7 @@ md"""
 begin
 
 	# setup liquid line calculation -
-	P = 125.0 # units: kPa
+	P = 101.325 # units: kPa
 	s₁ = "Acetone"
 	s₂ = "Water"
 
@@ -222,20 +229,26 @@ begin
 	# skip factor -
 	skip = 100
 	
-	plot(liquid_array[:,1], liquid_array[:,2], lw=3, label="Liquid", legend=:topright, bg="floralwhite", 
+	plot(liquid_array[:,1], liquid_array[:,2], lw=3, label="Liquid (ideal)", legend=:topright, bg="floralwhite", 
 		background_color_outside="white", framestyle = :box, fg_legend = :transparent, 
 		c=colorant"#0068AC")
-	plot!(vapor_array[:,1], vapor_array[:,2], lw=3, label="Vapor", c=colorant"#EF4035")
-	scatter!(liquid_array[1:skip:number_of_points,1],liquid_array[1:skip:number_of_points,2],
-		mc=:white, msc=colorant"#0068AC", label="")
-	scatter!(vapor_array[1:skip:number_of_points,1],vapor_array[1:skip:number_of_points,2],
-		mc=:white, msc=colorant"#EF4035", label="")
-	scatter!(vapor_array[end-1:end,1],vapor_array[end-1:end,2], mc=:white, msc=:red, label="")
+	plot!(vapor_array[:,1], vapor_array[:,2], lw=3, label="Vapor (ideal)", c=colorant"#EF4035")
+	# scatter!(liquid_array[1:skip:number_of_points,1],liquid_array[1:skip:number_of_points,2],
+	# 	mc=:white, msc=colorant"#0068AC", label="")
+	# scatter!(vapor_array[1:skip:number_of_points,1],vapor_array[1:skip:number_of_points,2],
+	# 	mc=:white, msc=colorant"#EF4035", label="")
+	# scatter!(vapor_array[end-1:end,1],vapor_array[end-1:end,2], mc=:white, msc=:red, label="")
 	xlabel!("Mole fraction x₁ or y₁", fontsize=18)
 	ylabel!("Temperature (degrees C)", fontsize=18)
 
+	# plot exp data -
+	# plot!(df_exp[:,:x1], df_exp[:,Symbol("T [C]")], c=colorant"#0068AC", lw=2, ls=:dash, label="Liquid (actual)")
+	# plot!(df_exp[:,:y1], df_exp[:,Symbol("T [C]")], c=colorant"#EF4035", lw=2, ls=:dash, label="Vapor (actual)")
+	# scatter!(df_exp[:,:x1], df_exp[:,Symbol("T [C]")], mc=:white, msc=colorant"#0068AC", label="")
+	# scatter!(df_exp[:,:y1], df_exp[:,Symbol("T [C]")], mc=:white, msc=colorant"#EF4035", label="")
+
 	# uncomment me to save to disk -
-	# savefig(joinpath(_PATH_TO_FIGS, "Fig-Txy-acetone-water-P125Pka.pdf"))
+	# savefig(joinpath(_PATH_TO_FIGS, "Fig-Txy-acetone-water-ideal-P101_325-Pka.pdf"))
 end
 
 # ╔═╡ 4e193fe8-3117-4414-8165-4469a3745714
@@ -1411,6 +1424,8 @@ version = "1.4.1+0"
 # ╟─c2c99030-4e5f-4519-aa85-e87959669d52
 # ╠═ba558fc3-5244-40b8-9646-8e177a3a6506
 # ╠═1b6ab6d6-dee5-4efc-83e6-b471919aa18c
+# ╠═c3de593c-00fe-4e7c-99ae-c0e9c0688282
+# ╠═6ef5c970-903b-442c-acc3-076d78df9e14
 # ╟─d9ba2b65-1317-4692-8df0-f43038fd8a8f
 # ╠═4eb37b1e-c4d9-4843-8c19-b6997550357e
 # ╟─767dd57f-3671-403b-86fb-d114b2ab9830
