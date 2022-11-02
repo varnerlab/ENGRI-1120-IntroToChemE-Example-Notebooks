@@ -229,26 +229,28 @@ begin
 	# skip factor -
 	skip = 100
 	
-	plot(liquid_array[:,1], liquid_array[:,2], lw=3, label="Liquid (ideal)", legend=:topright, bg="floralwhite", 
-		background_color_outside="white", framestyle = :box, fg_legend = :transparent, 
-		c=colorant"#0068AC")
-	plot!(vapor_array[:,1], vapor_array[:,2], lw=3, label="Vapor (ideal)", c=colorant"#EF4035")
+	plot(liquid_array[:,1], liquid_array[:,2], lw=3, label="Liquid (ideal)", legend=:topright, 
+		bg=colorant"#F2F2F2", background_color_outside="white", framestyle = :box, fg_legend = :transparent, minorticks=0.1, c=colorant"#BDBBBB")
+	plot!(vapor_array[:,1], vapor_array[:,2], lw=3, label="Vapor (ideal)", c=colorant"#55565A")
 	# scatter!(liquid_array[1:skip:number_of_points,1],liquid_array[1:skip:number_of_points,2],
-	# 	mc=:white, msc=colorant"#0068AC", label="")
-	# scatter!(vapor_array[1:skip:number_of_points,1],vapor_array[1:skip:number_of_points,2],
-	# 	mc=:white, msc=colorant"#EF4035", label="")
-	# scatter!(vapor_array[end-1:end,1],vapor_array[end-1:end,2], mc=:white, msc=:red, label="")
+	#  	mc=:white, msc=colorant"#0068AC", label="")
+	#  scatter!(vapor_array[1:skip:number_of_points,1],vapor_array[1:skip:number_of_points,2],
+	#  	mc=:white, msc=colorant"#EF4035", label="")
+	#  scatter!(vapor_array[end-1:end,1],vapor_array[end-1:end,2], mc=:white, msc=:red, label="")
 	xlabel!("Mole fraction x₁ or y₁", fontsize=18)
 	ylabel!("Temperature (degrees C)", fontsize=18)
 
 	# plot exp data -
-	# plot!(df_exp[:,:x1], df_exp[:,Symbol("T [C]")], c=colorant"#0068AC", lw=2, ls=:dash, label="Liquid (actual)")
-	# plot!(df_exp[:,:y1], df_exp[:,Symbol("T [C]")], c=colorant"#EF4035", lw=2, ls=:dash, label="Vapor (actual)")
-	# scatter!(df_exp[:,:x1], df_exp[:,Symbol("T [C]")], mc=:white, msc=colorant"#0068AC", label="")
-	# scatter!(df_exp[:,:y1], df_exp[:,Symbol("T [C]")], mc=:white, msc=colorant"#EF4035", label="")
+	plot!(df_exp[:,:x1], df_exp[:,Symbol("T [C]")], c=colorant"#BDBBBB", lw=3, 
+		label="", ls=:dash)
+	plot!(df_exp[:,:y1], df_exp[:,Symbol("T [C]")], c=colorant"#55565A", lw=3, label="", ls=:dash)
+	scatter!(df_exp[:,:x1], df_exp[:,Symbol("T [C]")], mc=:white, msc=colorant"#55565A", 
+		label="Liquid (actual)")
+	scatter!(df_exp[:,:y1], df_exp[:,Symbol("T [C]")], mc=colorant"#55565A", msc=colorant"#55565A",
+		label="Vapor (actual)")
 
 	# uncomment me to save to disk -
-	# savefig(joinpath(_PATH_TO_FIGS, "Fig-Txy-acetone-water-ideal-P101_325-Pka.pdf"))
+	#savefig(joinpath(_PATH_TO_FIGS, "Fig-Txy-acetone-water-ideal-P101_325-kPa-AP2.pdf"))
 end
 
 # ╔═╡ 4e193fe8-3117-4414-8165-4469a3745714

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.13
+# v0.19.14
 
 using Markdown
 using InteractiveUtils
@@ -136,7 +136,7 @@ begin
 	# pick two compounds -
 	species_1 = "Acetone"
 	species_2 = "Water"
-	T = 80.0; # units: C
+	T = 85.0; # units: C
 
 	# how many composition pairs do we want?
 	number_of_pairs = 1000
@@ -174,20 +174,24 @@ begin
 	# skip factor -
 	skip = 100
 	
-	plot(liquid_line[:,1], liquid_line[:,2], lw=3, label="Liquid", legend=:topleft, bg="floralwhite", 
-		background_color_outside="white", framestyle = :box, fg_legend = :transparent, 
-		c=colorant"#0068AC")
-	plot!(vapor_line[:,1], vapor_line[:,2], lw=3, label="Vapor", c=colorant"#EF4035")
+	plot(liquid_line[:,1], liquid_line[:,2], lw=3, label="", legend=:topleft, bg=colorant"#F2F2F2", 
+		background_color_outside="white", framestyle = :box, fg_legend = :transparent, minorticks=0.1,
+		c=colorant"#BDBBBB", ylims=(0,280))
+	
+	plot!(vapor_line[:,1], vapor_line[:,2], lw=3, label="", c=colorant"#55565A")
+	
 	scatter!(liquid_line[1:skip:number_of_pairs,1],liquid_line[1:skip:number_of_pairs,2],
-		mc=:white, msc=colorant"#0068AC", label="")
+		mc=:white, msc=colorant"#55565A", label="Liquid")
+	
 	scatter!(vapor_line[1:skip:number_of_pairs,1],vapor_line[1:skip:number_of_pairs,2],
-		mc=:white, msc=colorant"#EF4035", label="")
-	scatter!(vapor_line[end-1:end,1],vapor_line[end-1:end,2], mc=:white, msc=:red, label="")
+		mc=colorant"#55565A", msc=colorant"#55565A", label="Vapor")
+	scatter!(vapor_line[end-1:end,1],vapor_line[end-1:end,2], 
+		mc=colorant"#55565A", msc=colorant"#55565A", label="")
 	xlabel!("Mole fraction x₁ or y₁", fontsize=18)
 	ylabel!("Pressure (kPa)", fontsize=18)
 
 	# uncomment me to save the figure to disk -
-	# savefig(joinpath(_PATH_TO_FIGS,"Fig-Pxy-acetone-water-80C.pdf"))
+	# savefig(joinpath(_PATH_TO_FIGS,"Fig-Pxy-acetone-water-85C-AP2.pdf"))
 end
 
 # ╔═╡ c270a5e8-62a7-455d-85b7-871bbd3090fb
