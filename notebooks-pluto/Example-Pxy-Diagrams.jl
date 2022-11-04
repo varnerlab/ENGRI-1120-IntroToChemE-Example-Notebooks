@@ -174,7 +174,7 @@ begin
 	# skip factor -
 	skip = 100
 	
-	plot(liquid_line[:,1], liquid_line[:,2], lw=3, label="", legend=:topleft, bg=colorant"#F2F2F2", 
+	plot(liquid_line[:,1], liquid_line[:,2], lw=4, label="", legend=:topleft, bg=colorant"#FFFFFF", 
 		background_color_outside="white", framestyle = :box, fg_legend = :transparent, minorticks=0.1,
 		c=colorant"#BDBBBB", ylims=(0,280))
 	
@@ -191,7 +191,8 @@ begin
 	ylabel!("Pressure (kPa)", fontsize=18)
 
 	# uncomment me to save the figure to disk -
-	# savefig(joinpath(_PATH_TO_FIGS,"Fig-Pxy-acetone-water-85C-AP2.pdf"))
+	savefig(joinpath(_PATH_TO_FIGS,"Fig-Pxy-acetone-water-85C-AP2.pdf"))
+
 end
 
 # ╔═╡ c270a5e8-62a7-455d-85b7-871bbd3090fb
@@ -514,9 +515,9 @@ version = "0.69.4"
 
 [[deps.GR_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Cairo_jll", "FFMPEG_jll", "Fontconfig_jll", "GLFW_jll", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Libtiff_jll", "Pixman_jll", "Pkg", "Qt5Base_jll", "Zlib_jll", "libpng_jll"]
-git-tree-sha1 = "bc9f7725571ddb4ab2c4bc74fa397c1c5ad08943"
+git-tree-sha1 = "080c3bfabd8242f52d84425fd2ee84ae75ad789d"
 uuid = "d2c73de3-f751-5644-a686-071e5b155ba9"
-version = "0.69.1+0"
+version = "0.69.1+1"
 
 [[deps.Gettext_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Libiconv_jll", "Pkg", "XML2_jll"]

@@ -229,8 +229,8 @@ begin
 	# skip factor -
 	skip = 100
 	
-	plot(liquid_array[:,1], liquid_array[:,2], lw=3, label="Liquid (ideal)", legend=:topright, 
-		bg=colorant"#F2F2F2", background_color_outside="white", framestyle = :box, fg_legend = :transparent, minorticks=0.1, c=colorant"#BDBBBB")
+	plot(liquid_array[:,1], liquid_array[:,2], lw=4, label="Liquid (ideal)", legend=:topright, 
+		bg=colorant"#FFFFFF", background_color_outside="white", framestyle = :box, fg_legend = :transparent, minorticks=0.1, c=colorant"#BDBBBB")
 	plot!(vapor_array[:,1], vapor_array[:,2], lw=3, label="Vapor (ideal)", c=colorant"#55565A")
 	# scatter!(liquid_array[1:skip:number_of_points,1],liquid_array[1:skip:number_of_points,2],
 	#  	mc=:white, msc=colorant"#0068AC", label="")
@@ -241,7 +241,7 @@ begin
 	ylabel!("Temperature (degrees C)", fontsize=18)
 
 	# plot exp data -
-	plot!(df_exp[:,:x1], df_exp[:,Symbol("T [C]")], c=colorant"#BDBBBB", lw=3, 
+	plot!(df_exp[:,:x1], df_exp[:,Symbol("T [C]")], c=colorant"#BDBBBB", lw=4, 
 		label="", ls=:dash)
 	plot!(df_exp[:,:y1], df_exp[:,Symbol("T [C]")], c=colorant"#55565A", lw=3, label="", ls=:dash)
 	scatter!(df_exp[:,:x1], df_exp[:,Symbol("T [C]")], mc=:white, msc=colorant"#55565A", 
@@ -250,7 +250,7 @@ begin
 		label="Vapor (actual)")
 
 	# uncomment me to save to disk -
-	#savefig(joinpath(_PATH_TO_FIGS, "Fig-Txy-acetone-water-ideal-P101_325-kPa-AP2.pdf"))
+	savefig(joinpath(_PATH_TO_FIGS, "Fig-Txy-acetone-water-ideal-P101_325-kPa-AP2.pdf"))
 end
 
 # ╔═╡ 4e193fe8-3117-4414-8165-4469a3745714
