@@ -14,7 +14,7 @@
     `exit_flag` = 0 if optimal
     `status_flag` = 5 if optimal
 """
-function calculate_optimal_flux_distribution(stoichiometric_matrix::Array{Float64,2}, default_bounds_array::Array{Float64,2},
+function _calculate_optimal_flux_distribution(stoichiometric_matrix::Array{Float64,2}, default_bounds_array::Array{Float64,2},
     species_bounds_array::Array{Float64,2}, objective_coefficient_array::Array{Float64,1}; min_flag::Bool = true)
 
     try
@@ -154,23 +154,12 @@ function calculate_optimal_flux_distribution(stoichiometric_matrix::Array{Float6
 end
 
 function compute_optimal_extent(stoichiometric_matrix::Array{Float64,2}, default_bounds_array::Array{Float64,2},
-    species_bounds_array::Array{Float64,2}, objective_coefficient_array::Array{Float64,1}; min_flag::Bool = true, θ::Float64 = 0.1)
+    species_bounds_array::Array{Float64,2}, objective_coefficient_array::Array{Float64,1}; min_flag::Bool = true)
 
     # compute first pass -
-    result = calculate_optimal_flux_distribution(stoichiometric_matrix, default_bounds_array, species_bounds_array, 
+    result = _calculate_optimal_flux_distribution(stoichiometric_matrix, default_bounds_array, species_bounds_array, 
         objective_coefficient_array; min_flag = min_flag);
 
-    # find the mRNA production rate, and then set a min degrdation rate -
-    calculated_flux = result.calculated_flux_array;
-    transcription_rate = calculated_flux[3];
-
-    # update the degradation rate -
-    default_bounds_array[4,1] = θ*transcription_rate;
-
-    # solve the problem again with the updated bounds -
-    result_final = calculate_optimal_flux_distribution(stoichiometric_matrix, default_bounds_array, species_bounds_array, 
-        objective_coefficient_array; min_flag = min_flag);
-    
     # return -
-    return result_final;
+    return result;
 end
